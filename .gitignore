@@ -3,3 +3,6 @@
 venv/
 .env/
 
+coordinates.crx
+coordinates.pem
+Extension/

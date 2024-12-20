@@ -1,22 +1,17 @@
 import time
-import asyncio
+from selenium import webdriver
+from selenium.webdriver.common.by import By
 
-start = time.time()
+#chrome_options = webdriver.ChromeOptions()
+#chrome_options.add_argument('--headless')
 
+url = 'https://parsinger.ru/selenium/1/1.html'
 
-async def sleeping(n):
-    # {time.time() - start:.4f} - время от начала работы программы до текущего момента.
-    # :.4f - ограничение количества знаков после запятой (4).
-    print(f"Начало выполнения длительной операции № {n}: {time.time() - start:.4f}")
-    await asyncio.sleep(1)  # Имитация длительной операции в 1 секунду длиной.
-    print(f"Длительная операция № {n} завершена")
-
-
-async def main():
-    # Запускаю 30 операций.
-    task = [sleeping(i) for i in range(1, 31)]
-    all_results = await asyncio.gather(*task)
-    print(f"Выполнено {len(all_results)} операций.")
-    print(f"Программа завершена за {time.time() - start:.4f}")
-
-asyncio.run(main())
+profile_params = ['MAX', 'PETROV', 'divma', '12', 'samara', 'per@pr.ru']
+with webdriver.Chrome() as browser:
+    browser.get(url)
+    input_form = browser.find_elements(By.CLASS_NAME, 'form')
+    for i, el in enumerate(input_form):
+        el.send_keys(profile_params[i])
+    browser.find_element(By.ID, 'btn').click()
+    print(browser.find_element(By.ID, 'result').text)
