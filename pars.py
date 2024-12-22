@@ -1,35 +1,35 @@
+import time
+from sys import excepthook
 from time import sleep
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
 
+#chrome_options = webdriver.ChromeOptions()
+#chrome_options.add_argument('--headless')
 
-
-chrome_options = webdriver.ChromeOptions()
-chrome_options.add_argument('--headless')
-
-url = 'https://parsinger.ru/selenium/5.5/5/1.html'
-
-with webdriver.Chrome(options=chrome_options) as browser:
+url = 'https://parsinger.ru/selenium/5.7/4/index.html'
+total = 0
+#options=chrome_options
+with webdriver.Chrome() as browser:
     browser.get(url)
-    elems = browser.find_elements(By.CSS_SELECTOR,'div[style]')[1:]
-    for elem in elems:
-        color_hex = elem.find_element(By.CSS_SELECTOR, 'span').text
-        res_btn = elem.find_elements(By.CSS_SELECTOR, 'option[value]')
-        for res in res_btn:
-            if res.text.strip() == color_hex.strip():
-                res.click()
-        button_color = elem.find_elements(By.CSS_SELECTOR, 'button[data-hex]')
-        for btn in button_color:
-            if btn.get_attribute('data-hex').strip() == color_hex:
-                btn.click()
-        elem.find_element(By.CSS_SELECTOR, 'input[type="checkbox"]').click()
-        elem.find_element(By.CSS_SELECTOR, 'input[type="text"]').send_keys(color_hex)
-        elem.find_element(By.XPATH, "//button[text()='Проверить']").click()
+    child_cont = browser.find_element(By.CSS_SELECTOR, 'div.child_container')
+    for _ in range(110):
+        try:
+            ActionChains(browser).scroll_to_element(child_cont).perform()
+            values = child_cont.find_elements(By.CSS_SELECTOR, 'input[type=checkbox]')
+            for value in values:
+                value_digit = value.get_attribute('value')
+                if int(value_digit) % 2 == 0:
+                    value.click()
+            child_cont = child_cont.find_element(By.XPATH, 'following-sibling::div[@class="child_container"]')
+        except:
+            break
 
-
-    button = browser.find_element(By.XPATH, "//button[text()='Проверить все элементы']")
-    button.click()
-    sleep(2)
+    time.sleep(3)
+    browser.find_element(By.CLASS_NAME, 'alert_button').click()
+    time.sleep(2)
     alert = browser.switch_to.alert
-    alert_text = alert.text
-    print(alert_text)
+    print(alert.text)
+
