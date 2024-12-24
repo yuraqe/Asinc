@@ -1,35 +1,34 @@
 import time
-from sys import excepthook
 from time import sleep
-
+from selenium.webdriver.common.keys import Keys
 from selenium import webdriver
-from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.by import By
 
-#chrome_options = webdriver.ChromeOptions()
-#chrome_options.add_argument('--headless')
+with webdriver.Chrome() as driver:
+    driver.get("https://parsinger.ru/selenium/5.10/6/index.html")
+#    driver.maximize_window()
+    sleep(1)
+    actions = ActionChains(driver)
+    sliders = driver.find_elements(By.CSS_SELECTOR, '.slider-container')
+    for slider in sliders:
+        slider_range = slider.find_element(By.CSS_SELECTOR, '.volume-slider')
+        width = slider_range.size['width']
+        offset = width // 100
+        target = slider.find_element(By.CSS_SELECTOR, '.target-value').text
+        difference = abs(50 - int(target))
+        if int(target) > 50:
+            actions.click_and_hold(slider_range).perform()
+            for i in range(difference):
+                slider_range.send_keys(Keys.ARROW_RIGHT)
+            actions.release(slider_range).perform()
+        else:
+            actions.click_and_hold(slider_range).perform()
+            for i in range(difference):
+                slider_range.send_keys(Keys.ARROW_LEFT)
+            actions.release(slider_range).perform()
 
-url = 'https://parsinger.ru/selenium/5.7/4/index.html'
-total = 0
-#options=chrome_options
-with webdriver.Chrome() as browser:
-    browser.get(url)
-    child_cont = browser.find_element(By.CSS_SELECTOR, 'div.child_container')
-    for _ in range(110):
-        try:
-            ActionChains(browser).scroll_to_element(child_cont).perform()
-            values = child_cont.find_elements(By.CSS_SELECTOR, 'input[type=checkbox]')
-            for value in values:
-                value_digit = value.get_attribute('value')
-                if int(value_digit) % 2 == 0:
-                    value.click()
-            child_cont = child_cont.find_element(By.XPATH, 'following-sibling::div[@class="child_container"]')
-        except:
-            break
 
-    time.sleep(3)
-    browser.find_element(By.CLASS_NAME, 'alert_button').click()
-    time.sleep(2)
-    alert = browser.switch_to.alert
-    print(alert.text)
 
+    time.sleep(1)
+    print(driver.find_element(By.ID, 'message').text)
